@@ -9,7 +9,6 @@ import { MdContactPhone } from 'react-icons/md';
 
 import { useDispatch, useSelector } from 'react-redux';
 import { addContact } from 'redux/contactSlice';
-import { getContacts } from 'redux/selector';
 import { toast } from 'react-toastify';
 
 
@@ -34,6 +33,7 @@ const ContactSchema = yup.object().shape({
 });
 
 const initialValues = { name: '', number: '' };
+const getContacts = state => state.contacts.items;
 
 export const ContactForm = () => {
   const contacts = useSelector(getContacts);
