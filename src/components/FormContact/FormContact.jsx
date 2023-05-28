@@ -7,6 +7,11 @@ import PropTypes from 'prop-types';
 import { BsFillTelephonePlusFill } from 'react-icons/bs';
 import { MdContactPhone } from 'react-icons/md';
 
+import { useDispatch, useSelector } from 'react-redux';
+import { addContact } from 'redux/contactSlice';
+import { getContacts } from 'redux/selector';
+import { toast } from 'react-toastify';
+
 
 
 const ContactSchema = yup.object().shape({
@@ -28,23 +33,47 @@ const ContactSchema = yup.object().shape({
     .required(),
 });
 
+const initialValues = { name: '', number: '' };
 
-export const ContactForm = ({ onAddContact }) => {
+export const ContactForm = () => {
+  const contacts = useSelector(getContacts);
+  const dispatch = useDispatch();
+
+  const isDublicate = ({ name, number }) => {
+    const normalizedName = name.toLowerCase().trim();
+    const normalizedNumber = number.trim();
+
+    const dublicate = contacts.find(
+      contact =>
+        contact.name.toLowerCase().trim() === normalizedName ||
+        contact.number.trim() === normalizedNumber
+    );
+    return Boolean(dublicate);
+  };
+
+  const onAddContact = ({ name, number }) => {
+    if (isDublicate({ name, number })) {
+      return toast.error(
+        `This contact is already in contacts`,
+        toast
+      );
+    }
+    dispatch(addContact({ name, number }));
+    // const action = addContact({ name, number });
+    // dispatch(action);
+  };
   return (
     <Formik
-      initialValues={{
-        name: '',
-        number: '',
+    initialValues={initialValues}
+    onSubmit={(values, { resetForm }) => {
+      onAddContact({ ...values });
+      resetForm();
       }}
 
       validationSchema={ContactSchema}
-      onSubmit={(values, actions) => {
-        onAddContact({ ...values, id: nanoid() });
-        // console.log (values);
-        actions.resetForm();
-      }}
+     
     >
-      <Form>
+      <Form  autoComplete="off">
         <FormField>
         <Label>
           <MdContactPhone size="20"/>
@@ -54,6 +83,7 @@ export const ContactForm = ({ onAddContact }) => {
             name="name"
             pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
             title="Name may contain only letters, apostrophe, dash and spaces. For example Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan"
+            id={nanoid()}
             required/>
           <ErrorMessage name="name" component="div" />
         </FormField>
@@ -66,6 +96,7 @@ export const ContactForm = ({ onAddContact }) => {
           name="number"
           pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
           title="Phone number must be digits and can contain spaces, dashes, parentheses and can start with +"
+          id={nanoid()}
           required/>
           <ErrorMessage name="name" component="div" /> 
         </FormField>

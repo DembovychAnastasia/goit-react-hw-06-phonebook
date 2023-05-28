@@ -20,11 +20,14 @@ export const ErrorMessage = styled(FormikErrorMessage)`
   font-size: 12px;
   color: red;
 `;
+
 export const Label = styled.div `
   display: flex;
   gap: 8px;
   margin-left: 8px;
   align-items: center;
+
+
 `;
 
 export const Button = styled.button`

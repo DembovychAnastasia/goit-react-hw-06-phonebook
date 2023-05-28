@@ -1,35 +1,41 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+import { useDispatch, useSelector } from 'react-redux';
+import { getContacts, getFilter } from 'redux/selector';
+import { deleteContact } from 'redux/contactSlice';
 import { Btn, Item, List } from './ContactList.styled'
 import { RiDeleteBin6Line } from 'react-icons/ri';
 
-export const ContactList = ({ contacts, onDelete }) => {
-    //console.log(contacts);
+export const ContactList = () => {
+  const contacts = useSelector(getContacts);
+  const filter = useSelector(getFilter);
+  const dispatch = useDispatch();
+
+  const filteredContacts = contacts?.filter(contact =>
+    contact?.name?.toLowerCase().includes(filter.toLowerCase())
+  );
+
+  const onDeleteContact = id => {
+    dispatch(deleteContact(id));
+  };
+
+  if (!filteredContacts?.length) {
+    return <Item>No contacts found.</Item>;
+  }
     return (
-      <List>
-        {contacts.map(({ name, number, id }) => {
-          return (
-            <Item key={id}>
-              <span>{name}:</span>
-              <span>{number}</span>
   
-              <Btn type="button" onClick={() => onDelete(id)}>
-                <RiDeleteBin6Line size="16" />
+        <List>
+          {filteredContacts.map(({ id, name, number }) => {
+             return (
+            <Item key={id}>
+              
+                <p>{name}: </p>
+                <p>{number}</p>
+              <Btn type="button" onClick={() => onDeleteContact(id)}>
+              <RiDeleteBin6Line size="16" />
               </Btn>
             </Item>
-          );
-        })}
-      </List>
-    );
-  };
-  
-  ContactList.propTypes = {
-    contacts: PropTypes.arrayOf(
-      PropTypes.shape({
-        id: PropTypes.string.isRequired,
-        name: PropTypes.string.isRequired,
-        number: PropTypes.string.isRequired,
-      }).isRequired
-    ),
-    onDelete: PropTypes.func.isRequired,
-  };
+             )
+          })}
+          
+        </List>
+      );
+};  
